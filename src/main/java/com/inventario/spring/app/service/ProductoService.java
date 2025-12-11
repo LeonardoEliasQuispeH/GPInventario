@@ -68,36 +68,5 @@ public class ProductoService {
 
     }
 
-    public String actualizarProducto(Producto producto) {
-        if (producto.getNombreProducto() == null || producto.getNombreProducto().isEmpty() ||
-            producto.getTalla() == null || producto.getTalla().isEmpty() ||
-            producto.getColor() == null || producto.getColor().isEmpty()) {
-            return "Todos los campos son obligatorios.";
-        }
-
-        if (producto.getStock() < 0) {
-            return "La cantidad no puede ser negativa.";
-        }
-
-        Optional<Producto> productoExistente = productoRepository.findById(producto.getId());
-        if (productoExistente.isEmpty()) {
-            return "Error al actualizar producto.";
-        }
-
-        Producto actual = productoExistente.get();
-
-        // Solo actualizar los campos editables
-        actual.setNombreProducto(producto.getNombreProducto());
-        actual.setStock(producto.getStock());
-        actual.setTalla(producto.getTalla());
-        actual.setColor(producto.getColor());
-        actual.setEstado(actual.getStock() > 0 ? "Disponible" : "Agotado");
-
-        try {
-            productoRepository.save(actual);
-            return "Producto actualizado correctamente.";
-        } catch (Exception e) {
-            return "Error al actualizar producto.";
-        }
-    }
+  
 }
