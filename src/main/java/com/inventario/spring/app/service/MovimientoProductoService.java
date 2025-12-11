@@ -102,5 +102,9 @@ public class MovimientoProductoService {
         return repo.obtenerMovimientosMesActual();
     }
 
-    
+    //HU21 DANIEL
+    public List<MovimientoProducto> obtenerHistorialPorProducto(Long idProducto) {
+        return movimientoProductoRepository.findByIdProductoOrderByFechaDesc(idProducto);
+    }
+    //
 }
