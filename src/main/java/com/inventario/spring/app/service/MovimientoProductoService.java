@@ -53,51 +53,7 @@ public class MovimientoProductoService {
         movimientoProductoRepository.save(movimiento);
     }
 
-    // Nuevo: registrar salida (valida, actualiza stock y estado, guarda movimiento)
-    public void registrarSalida(MovimientoProducto movimiento) {
-        if (movimiento.getCantidadMovimiento() <= 0) {
-            throw new RuntimeException("La cantidad a retirar debe ser al menos 1.");
-        }
-
-        // obtener producto asociado (lanza excepción si no existe)
-        Long productoId = movimiento.getProducto() != null ? movimiento.getProducto().getId() : null;
-        if (productoId == null) {
-            throw new RuntimeException("Debe seleccionar un producto.");
-        }
-
-        Producto producto = productoService.obtenerProductoPorId(productoId);
-
-        int cantidadDisponible = producto.getStock();
-        int cantidadRetiro = movimiento.getCantidadMovimiento();
-
-        if (cantidadRetiro > cantidadDisponible) {
-            throw new RuntimeException("No hay stock suficiente. Disponible: " + cantidadDisponible);
-        }
-
-        // actualizar stock y estado
-        int nuevoStock = cantidadDisponible - cantidadRetiro;
-        producto.setStock(nuevoStock);
-        producto.setEstado(nuevoStock == 0 ? "Agotado" : "Disponible");
-
-        // guardar producto (usa tu método de servicio para persistir)
-        productoService.actualizarProducto(producto); // asumiendo que devuelve mensaje, pero guarda en BD
-
-        // completar movimiento
-        movimiento.setTipoMovimiento("salida");
-        movimiento.setFechaMovimiento(LocalDateTime.now());
-
-        // asegurar que la referencia a producto esté completa (puede ser solo id)
-        movimiento.setProducto(producto);
-
-        movimientoProductoRepository.save(movimiento);
-    }
-
-    public List<MovimientoProducto> movimientosUltimos30Dias() {
-        LocalDateTime hace30Dias = LocalDateTime.now().minusDays(30);
-        return movimientoProductoRepository
-                .findByFechaMovimientoBetween(hace30Dias, LocalDateTime.now());
-    }
-
+   
     public List<MovimientoProductoMesActual> obtenerDatosMesActual() {
         return repo.obtenerMovimientosMesActual();
     }
