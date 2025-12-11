@@ -39,9 +39,6 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="col-md-3">
-            <input type="text" id="buscador" class="form-control" placeholder="Buscar Producto">
-        </div>
 
         <div class="d-flex gap-2">
             <a href="/productos/exportar-excel" class="btn btn-primary">
@@ -145,38 +142,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-const buscador = document.getElementById('buscador');
-const tablaBody = document.querySelector('table tbody');
-
-buscador.addEventListener('keyup', function() {
-    const filtro = this.value.toLowerCase();
-    let coincidencias = 0;
-
-    tablaBody.querySelectorAll('tr').forEach(tr => {
-        if(tr.getAttribute('data-placeholder')) return;
-
-        const nombre = tr.children[1].textContent.toLowerCase();
-        if(nombre.includes(filtro)) {
-            tr.style.display = '';
-            coincidencias++;
-        } else {
-            tr.style.display = 'none';
-        }
-    });
-
-    let mensajeFila = tablaBody.querySelector('tr[data-placeholder]');
-    if(!mensajeFila) {
-        mensajeFila = document.createElement('tr');
-        mensajeFila.setAttribute('data-placeholder', 'true');
-        mensajeFila.innerHTML = `
-            <td colspan="7" class="text-center text-muted">
-                <i class="bi bi-search"></i> No se encontraron productos.
-            </td>`;
-        tablaBody.appendChild(mensajeFila);
-    }
-
-    mensajeFila.style.display = coincidencias === 0 ? '' : 'none';
-});
 
 document.querySelector("a[href='/productos/exportar-excel']")
     .addEventListener("click", function () {
