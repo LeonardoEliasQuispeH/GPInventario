@@ -57,7 +57,9 @@ public interface MovimientoProductoRepository extends JpaRepository<MovimientoPr
             @Param("fin") LocalDateTime fin
     );
 
-    
+    //HU DANIEL
+    @Query("SELECT m FROM MovimientoProducto m WHERE m.producto.id = :idProducto ORDER BY m.fechaMovimiento DESC")
+    List<MovimientoProducto> findByIdProductoOrderByFechaDesc(@Param("idProducto") Long idProducto);
 
     
 }
