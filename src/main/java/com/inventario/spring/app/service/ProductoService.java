@@ -22,9 +22,7 @@ public class ProductoService {
         return productoRepository.findAll();
     }
 
-    public Optional<Producto> buscarPorId(Long id) {
-        return productoRepository.findById(id);
-    }
+   
 
     public Producto obtenerProductoPorId(Long id) {
         return productoRepository.findById(id)
