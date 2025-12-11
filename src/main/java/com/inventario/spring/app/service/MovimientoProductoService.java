@@ -98,7 +98,9 @@ public class MovimientoProductoService {
                 .findByFechaMovimientoBetween(hace30Dias, LocalDateTime.now());
     }
 
-   
+    public List<MovimientoProductoMesActual> obtenerDatosMesActual() {
+        return repo.obtenerMovimientosMesActual();
+    }
 
     //HU21 DANIEL
     public List<MovimientoProducto> obtenerHistorialPorProducto(Long idProducto) {
