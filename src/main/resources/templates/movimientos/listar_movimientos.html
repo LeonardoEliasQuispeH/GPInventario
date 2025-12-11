@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Movimientos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<!-- 🔹 Barra de navegación -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventario</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/productos">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/movimientos">Movimientos</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 🔹 Contenido principal -->
+<div class="container mt-5">
+
+    <!-- Título -->
+    <div class="text-center mb-4">
+        <h3>Listado de Movimientos</h3>
+    </div>
+
+    <!-- 🔹 Fila con buscador y botones -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <!-- Buscador -->
+        <div class="col-md-3">
+            <input type="text" id="buscador" class="form-control" placeholder="Buscar por producto">
+        </div>
+
+        <!-- Botones Registrar -->
+        <div>
+            <a href="/movimientos/exportar-30-dias" class="btn btn-primary me-2">
+                <i class="bi bi-file-earmark-excel"></i> Exportar últimos 30 días
+            </a>
+            <a href="/movimientos/nueva-entrada" class="btn btn-success me-2">
+                <i class="bi bi-box-arrow-in-down"></i> Registrar Entrada
+            </a>
+            <a href="/movimientos/nueva-salida" class="btn btn-danger">
+                <i class="bi bi-box-arrow-up"></i> Registrar Salida
+            </a>
+        </div>
+    </div>
+
+    <!-- 🔹 Tabla responsiva -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>ID Movimiento</th>
+                    <th>Nombre del Producto</th>
+                    <th>Tipo de Movimiento</th>
+                    <th>Fecha</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Si hay movimientos -->
+                <tr th:each="m : ${movimientos}">
+                    <td th:text="${m.idMovimiento}"></td>
+                    <td th:text="${m.producto.nombreProducto}"></td>
+                    <td th:text="${m.tipoMovimiento}"></td>
+                    <td th:text="${#temporals.format(m.fechaMovimiento, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${m.cantidadMovimiento}"></td>
+                </tr>
+
+                <!-- Si no hay movimientos -->
+                <tr th:if="${#lists.isEmpty(movimientos)}">
+                    <td colspan="5" class="text-center text-muted">
+                        <i class="bi bi-arrow-repeat"></i> No hay movimientos registrados en el sistema.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const buscador = document.getElementById('buscador');
+const tablaBody = document.querySelector('table tbody');
+
+buscador.addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    let coincidencias = 0;
+
+    tablaBody.querySelectorAll('tr').forEach(tr => {
+        // Ignorar la fila de mensaje de "No se encontraron movimientos"
+        if(tr.getAttribute('data-placeholder')) return;
+
+        const nombre = tr.children[1].textContent.toLowerCase();
+        if(nombre.includes(filtro)) {
+            tr.style.display = '';
+            coincidencias++;
+        } else {
+            tr.style.display = 'none';
+        }
+    });
+
+    // Mostrar mensaje si no hay coincidencias
+    let mensajeFila = tablaBody.querySelector('tr[data-placeholder]');
+    if(!mensajeFila) {
+        mensajeFila = document.createElement('tr');
+        mensajeFila.setAttribute('data-placeholder', 'true');
+        mensajeFila.innerHTML = `
+            <td colspan="5" class="text-center text-muted">
+                <i class="bi bi-search"></i> No se encontraron movimientos.
+            </td>`;
+        tablaBody.appendChild(mensajeFila);
+    }
+
+    mensajeFila.style.display = coincidencias === 0 ? '' : 'none';
+});
+</script>
+
+</body>
+</html>

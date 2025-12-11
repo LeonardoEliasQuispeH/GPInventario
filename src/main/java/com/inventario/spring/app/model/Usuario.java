@@ -35,6 +35,9 @@ public class Usuario {
     private String clave;  // Contraseña hasheada (no texto plano)
 
     @Column(nullable = false)
+    private String estado;
+
+    @Column(nullable = false)
     private LocalDateTime fechaCreacion;
 
     public Long getId() {
@@ -107,6 +110,14 @@ public class Usuario {
 
     public void setClave(String clave) {
         this.clave = clave;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public LocalDateTime getFechaCreacion() {

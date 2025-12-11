@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.inventario.spring.app.model.Usuario;
@@ -106,6 +107,9 @@ public class UsuarioController {
         nuevoUsuario.setClave(claveGenerada);
         nuevoUsuario.setFechaCreacion(java.time.LocalDateTime.now());
 
+        // 🔹 Establecer estado por defecto
+        nuevoUsuario.setEstado("Activo");
+
         try {
             usuarioService.guardarUsuario(nuevoUsuario);
             model.addAttribute("mensajeExito",
@@ -126,9 +130,9 @@ public class UsuarioController {
     // 🧮 Generar campo usuario automáticamente
     private String generarUsuario(Usuario u) {
         String inicialApellido = u.getApellido().substring(0, 1).toUpperCase();
-        String nombreMinus = u.getNombre().toLowerCase();
+        String primerNombreMinus = u.getNombre().split(" ")[0].toLowerCase();
         String primerDni = u.getDni().substring(0, 1);
-        return inicialApellido + nombreMinus + primerDni;
+        return inicialApellido + primerNombreMinus + primerDni;
     }
 
     // 🧮 Generar contraseña según fórmula HU03
@@ -203,13 +207,15 @@ public class UsuarioController {
         return "usuarios/editar_usuario"; // 👈 ya NO redirige
     }
 
-    @GetMapping("/usuarios/eliminar/{id}")
-    public String eliminarUsuario(@PathVariable Long id, RedirectAttributes redirectAttrs) {
+    @PostMapping("/usuarios/cambiar-estado/{id}")
+    public String cambiarEstadoUsuario(@PathVariable Long id, @RequestParam("activo") boolean activo,
+                                    RedirectAttributes redirectAttrs) {
         try {
-            usuarioService.eliminarUsuario(id);
-            redirectAttrs.addFlashAttribute("exito", "Usuario eliminado correctamente.");
+            usuarioService.cambiarEstadoUsuario(id, activo);
+            String mensaje = activo ? "Usuario activado correctamente." : "Usuario desactivado correctamente.";
+            redirectAttrs.addFlashAttribute("exito", mensaje);
         } catch (Exception e) {
-            redirectAttrs.addFlashAttribute("error", "Error al eliminar usuario.");
+            redirectAttrs.addFlashAttribute("error", "Error al actualizar el estado del usuario.");
         }
         return "redirect:/usuarios";
     }

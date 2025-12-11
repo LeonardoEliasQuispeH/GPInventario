@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Salida</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Inventario</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link" href="/productos">Productos</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="/movimientos">Movimientos</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <h3 class="mb-4">Registrar Salida de Producto</h3>
+
+    <!-- Mensaje de éxito/error (controller debe poner 'mensaje' y 'tipoMensaje') -->
+    <div th:if="${mensaje}"
+         th:class="'alert alert-' + ${tipoMensaje}"
+         role="alert">
+        <span th:text="${mensaje}"></span>
+    </div>
+
+    <form th:action="@{/movimientos/guardar-salida}"
+          th:object="${movimiento}"
+          method="post"
+          class="card p-4">
+
+        <!-- Select producto (cada option tiene data-stock, data-talla, data-color) -->
+        <div class="mb-3">
+            <label class="form-label">Producto</label>
+            <select class="form-select" th:field="*{producto.id}" id="productoSelect" required>
+                <option value="">Selecciona un producto</option>
+                <option th:each="p : ${productos}"
+                        th:value="${p.id}"
+                        th:text="${p.nombreProducto + ' - ' + p.color + ' - Talla ' + p.talla}"
+                        th:attr="data-stock=${p.stock},data-talla=${p.talla},data-color=${p.color}">
+                </option>
+            </select>
+        </div>
+
+        <!-- Stock disponible (readonly) -->
+        <div class="mb-3">
+            <label class="form-label">Stock disponible</label>
+            <input id="stockDisponible" class="form-control" type="number" readonly>
+        </div>
+
+        <!-- Cantidad a retirar -->
+        <div class="mb-3">
+            <label class="form-label">Cantidad a retirar</label>
+            <input type="number" th:field="*{cantidadMovimiento}" class="form-control" min="1" required>
+        </div>
+
+        <!-- Tipo movimiento oculto (opcional, backend también lo fijará) -->
+        <input type="hidden" th:field="*{tipoMovimiento}" value="salida"/>
+
+        <button type="submit" class="btn btn-danger w-100">Registrar Salida</button>
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="/movimientos" class="btn btn-secondary">Volver al listado</a>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /* JS ligero para mostrar stock/talla/color desde data-* del option */
+    (function () {
+        const select = document.getElementById('productoSelect');
+        const stockInput = document.getElementById('stockDisponible');
+
+        function actualizar() {
+            const opt = select.options[select.selectedIndex];
+            if (!opt || !opt.value) {
+                stockInput.value = '';
+                return;
+            }
+            stockInput.value = opt.dataset.stock || '';
+        }
+
+        select.addEventListener('change', actualizar);
+        document.addEventListener('DOMContentLoaded', actualizar);
+    })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Mensual</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <style>
+        /* 🔵 Ajuste del tamaño del gráfico (más pequeño) */
+        #chartWrapper {
+            max-width: 720px;     /* antes ocupaba casi toda la pantalla — ahora más compacto */
+            margin: 0 auto;       /* centrado */
+        }
+
+        #chartMes {
+            height: 320px !important;  /* antes era más grande — ahora tamaño equilibrado */
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventario</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">            
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <h2 class="text-center mb-4">📊 Salidas por Mes</h2>
+
+    <!-- Form (filtrar por mes rango) -->
+    <form method="get" action="/reporte/graficos/rango" class="row g-2 align-items-end mb-4">
+        <div class="col-auto">
+            <label class="form-label">Mes inicio</label>
+            <input type="month" name="mesInicio" th:value="${mesInicio}" class="form-control" required>
+        </div>
+        <div class="col-auto">
+            <label class="form-label">Mes fin</label>
+            <input type="month" name="mesFin" th:value="${mesFin}" class="form-control" required>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Aplicar</button>
+        </div>
+    </form>
+
+    <!-- Contenedores con JSON (inyectados seguro desde controller) -->
+    <div id="jsonMonths" th:attr="data-json=${datosJsonMonths}" style="display:none;"></div>
+    <div id="jsonTable" th:attr="data-json=${datosJsonTable}" style="display:none;"></div>
+
+    <!-- Gráfico -->
+<div class="card p-3 shadow mb-4">
+    <h4 class="text-center mb-3">Totales por Mes</h4>
+    <canvas id="chartMes" style="width: 100% !important; height: 260px !important;"></canvas>
+</div>
+
+    <!-- Tabla -->
+    <div class="card p-3 shadow">
+        <h4 class="mb-3">Detalle por Producto y Mes</h4>
+        <table class="table table-striped">
+            <thead class="table-dark">
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Mes</th>
+                <th>Año</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${datos}">
+                <td th:text="${d.nombreProducto}">Producto</td>
+                <td th:text="${d.cantidadTotal}">0</td>
+                <td th:text="${d.mesNombre}">Mes</td>
+                <td th:text="${d.anio}">Año</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(datos)}">
+                <td colspan="4" class="text-center text-muted">No hay datos</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Leer JSON serializado que inyectó el controller (datosJsonMonths: {labels:[], values:[]})
+    const monthsEl = document.getElementById('jsonMonths');
+    const tableEl = document.getElementById('jsonTable');
+
+    const monthsJson = monthsEl ? monthsEl.getAttribute('data-json') : null;
+    const tableJson = tableEl ? tableEl.getAttribute('data-json') : null;
+
+    let monthsData = { labels: [], values: [] };
+    if (monthsJson) {
+        try { monthsData = JSON.parse(monthsJson); } catch(e) { console.error(e); }
+    }
+
+    // dibujar gráfico de meses
+    const ctx = document.getElementById('chartMes').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: monthsData.labels,
+            datasets: [{
+                label: 'Total salidas',
+                data: monthsData.values,
+                backgroundColor: 'rgba(54,162,235,0.6)',
+                borderColor: 'rgba(54,162,235,1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, title: { display: true, text: 'Cantidad' } },
+                x: { title: { display: true, text: 'Mes' } }
+            }
+        }
+    });
+
+    // (la tabla Thymeleaf se ha renderizado en el server, por eso no la reconstruimos aquí)
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

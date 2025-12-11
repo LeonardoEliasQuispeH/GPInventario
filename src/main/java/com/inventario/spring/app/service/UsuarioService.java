@@ -103,11 +103,11 @@ public class UsuarioService {
     }
 
 
-    public void eliminarUsuario(Long id) {
-    if (usuarioRepository.existsById(id)) {
-        usuarioRepository.deleteById(id);
-    } else {
-        throw new RuntimeException("Usuario no encontrado");
+    public void cambiarEstadoUsuario(Long id, boolean activo) {
+    Usuario usuario = usuarioRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    usuario.setEstado(activo ? "Activo" : "Desactivado");
+    usuarioRepository.save(usuario);
     }
-}
 }

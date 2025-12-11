@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Listado de Productos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventario</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/productos">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/movimientos">Movimientos</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h3>Listado de Productos</h3>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="col-md-3">
+            <input type="text" id="buscador" class="form-control" placeholder="Buscar Producto">
+        </div>
+
+        <div class="d-flex gap-2">
+            <a href="/productos/exportar-excel" class="btn btn-primary">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+            </a>
+
+            <a href="/productos/nuevo" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Añadir Producto
+            </a>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre del Producto</th>
+                    <th>Cantidad</th>
+                    <th>Talla</th>
+                    <th>Color</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="producto : ${productos}"
+    th:classappend="${producto.stock == 0} ? 'table-danger' : ((${producto.stock > 0} and ${producto.stock <= 10}) ? 'table-warning' : '')">
+
+                    <td th:text="${producto.id}"></td>
+
+                    <td>
+                        <span th:text="${producto.nombreProducto}"></span>
+
+                        <!-- Icono si está agotado -->
+                        <i class="bi bi-exclamation-triangle-fill text-danger ms-2"
+                        th:if="${producto.stock == 0}"></i>
+
+                        <!-- Icono si está en bajo stock -->
+                        <i class="bi bi-exclamation-circle-fill text-warning ms-2"
+                        th:if="${producto.stock > 0 and producto.stock <= 10}"></i>
+                    </td>
+
+                    <td th:text="${producto.stock}"></td>
+                    <td th:text="${producto.talla}"></td>
+                    <td th:text="${producto.color}"></td>
+
+                    <td class="text-center">
+
+                        <!-- Agotado -->
+                        <span class="badge bg-danger"
+                            th:if="${producto.stock == 0}">
+                            Agotado
+                        </span>
+
+                        <!-- Bajo stock -->
+                        <span class="badge bg-warning text-dark"
+                            th:if="${producto.stock > 0 and producto.stock <= 10}">
+                            Bajo Stock
+                        </span>
+
+                        <!-- Disponible (stock 11 o más) -->
+                        <span class="badge bg-success"
+                            th:if="${producto.stock > 10}">
+                            Disponible
+                        </span>
+
+                    </td>
+
+                    <td class="text-center">
+                        <a th:href="@{'/productos/detalles/' + ${producto.id}}" class="text-info me-2" title="Ver detalles">
+                            <i class="bi bi-eye-fill"></i>
+                        </a>
+                        <a th:href="@{'/productos/editar/' + ${producto.id}}" class="text-primary" title="Actualizar">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(productos)}">
+                    <td colspan="7" class="text-center text-muted">
+                        <i class="bi bi-box-seam"></i> No hay productos registrados en el sistema.
+                    </td>
+                </tr>
+
+                </tbody>
+        </table>
+    </div>
+
+</div>
+
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toastExcel" class="toast bg-success text-white" role="alert">
+        <div class="toast-body">
+            ¡El inventario se exportó correctamente!
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const buscador = document.getElementById('buscador');
+const tablaBody = document.querySelector('table tbody');
+
+buscador.addEventListener('keyup', function() {
+    const filtro = this.value.toLowerCase();
+    let coincidencias = 0;
+
+    tablaBody.querySelectorAll('tr').forEach(tr => {
+        if(tr.getAttribute('data-placeholder')) return;
+
+        const nombre = tr.children[1].textContent.toLowerCase();
+        if(nombre.includes(filtro)) {
+            tr.style.display = '';
+            coincidencias++;
+        } else {
+            tr.style.display = 'none';
+        }
+    });
+
+    let mensajeFila = tablaBody.querySelector('tr[data-placeholder]');
+    if(!mensajeFila) {
+        mensajeFila = document.createElement('tr');
+        mensajeFila.setAttribute('data-placeholder', 'true');
+        mensajeFila.innerHTML = `
+            <td colspan="7" class="text-center text-muted">
+                <i class="bi bi-search"></i> No se encontraron productos.
+            </td>`;
+        tablaBody.appendChild(mensajeFila);
+    }
+
+    mensajeFila.style.display = coincidencias === 0 ? '' : 'none';
+});
+
+document.querySelector("a[href='/productos/exportar-excel']")
+    .addEventListener("click", function () {
+        setTimeout(() => {
+            const toast = new bootstrap.Toast(document.getElementById('toastExcel'));
+            toast.show();
+        }, 500);
+    });
+</script>
+
+</body>
+</html>

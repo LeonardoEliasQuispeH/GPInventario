@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Producto</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .card-shadow {
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        .section-title {
+            border-left: 4px solid #0d6efd;
+            padding-left: 10px;
+            font-weight: bold;
+        }
+        .table thead {
+            background: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventario</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/productos">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/movimientos">Movimientos</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-4">
+
+    <h2 class="mb-4 text-center fw-bold">Detalles del Producto</h2>
+
+    <!-- INFORMACIÓN DEL PRODUCTO -->
+    <div class="card card-shadow mb-4">
+        <div class="card-body">
+
+            <h4 class="section-title">Información del producto</h4>
+
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <p><strong>ID:</strong> <span th:text="${producto.id}"></span></p>
+                    <p><strong>Nombre:</strong> <span th:text="${producto.nombreProducto}"></span></p>
+                    <p><strong>Stock:</strong> <span th:text="${producto.stock}"></span></p>
+                </div>
+
+                <div class="col-md-6">
+                    <p><strong>Talla:</strong> <span th:text="${producto.talla}"></span></p>
+                    <p><strong>Color:</strong> <span th:text="${producto.color}"></span></p>
+                    <p><strong>Estado:</strong> <span th:text="${producto.estado}"></span></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- HISTORIAL DE MOVIMIENTOS -->
+    <div class="card card-shadow">
+        <div class="card-body">
+
+            <h4 class="section-title">Historial de movimientos</h4>
+
+            <div class="mt-3">
+
+                <!-- SI NO HAY MOVIMIENTOS -->
+                <div th:if="${historialMovimientos == null or #lists.isEmpty(historialMovimientos)}">
+                    <div class="alert alert-info text-center">
+                        Este producto no tiene movimientos registrados aún.
+                    </div>
+                </div>
+
+                <!-- TABLA DE MOVIMIENTOS -->
+                <div th:if="${historialMovimientos != null and !#lists.isEmpty(historialMovimientos)}">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle text-center">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Cantidad</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="mov : ${historialMovimientos}">
+                                    <td th:text="${#temporals.format(mov.fechaMovimiento, 'yyyy-MM-dd HH:mm')}"></td>
+
+                                    <td>
+                                        <span th:text="${mov.tipoMovimiento}"
+                                              th:classappend="${mov.tipoMovimiento == 'entrada'} 
+                                                              ? 'text-success fw-bold' 
+                                                              : 'text-danger fw-bold'">
+                                        </span>
+                                    </td>
+
+                                    <td th:text="${mov.cantidadMovimiento}"></td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- BOTÓN VOLVER -->
+    <div class="mt-4 text-center">
+        <a href="/productos" class="btn btn-secondary btn-lg">Volver al listado</a>
+    </div>
+
+</div>
+
+</body>
+</html>

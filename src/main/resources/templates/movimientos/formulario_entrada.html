@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Entrada</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<!-- 🔹 Barra de navegación -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventario</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/productos">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/movimientos">Movimientos</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar sesión</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container mt-5">
+
+    <h3 class="text-center mb-4">Registrar Entrada de Producto</h3>
+
+    <!-- MENSAJE DE ÉXITO / ERROR (controlador debe setear 'mensaje' y 'tipoMensaje') -->
+    <div th:if="${mensaje}"
+         th:class="'alert alert-' + ${tipoMensaje}"
+         role="alert"
+         class="mb-4">
+        <span th:text="${mensaje}"></span>
+    </div>
+
+    <form th:action="@{/movimientos/guardar-entrada}"
+          th:object="${movimiento}"
+          method="post"
+          class="card p-4">
+
+        <!-- PRODUCTO: cada option tiene data-talla y data-color -->
+        <div class="mb-3">
+            <label class="form-label">Producto</label>
+            <select class="form-select"
+                    th:field="*{producto.id}"
+                    id="productoSelect"
+                    required>
+                <option value="">Selecciona un producto</option>
+
+                <option th:each="p : ${productos}"
+                        th:value="${p.id}"
+                        th:text="${p.nombreProducto + ' - ' + p.color + ' - Talla ' + p.talla}"
+                        th:attr="data-talla=${p.talla},data-color=${p.color}">
+                </option>
+            </select>
+        </div>
+
+        <!-- TALLA (readonly) -->
+        <div class="mb-3">
+            <label class="form-label">Talla</label>
+            <input id="tallaInput" class="form-control" type="text" readonly>
+        </div>
+
+        <!-- COLOR (readonly) -->
+        <div class="mb-3">
+            <label class="form-label">Color</label>
+            <input id="colorInput" class="form-control" type="text" readonly>
+        </div>
+
+        <!-- CANTIDAD -->
+        <div class="mb-3">
+            <label class="form-label">Cantidad a ingresar</label>
+            <input type="number"
+                   th:field="*{cantidadMovimiento}"
+                   class="form-control"
+                   min="1"
+                   required>
+        </div>
+
+        <!-- TIPO FIJO: entrada -->
+        <input type="hidden" th:field="*{tipoMovimiento}" value="entrada"/>
+
+        <button type="submit" class="btn btn-success w-100">Registrar Entrada</button>
+
+    </form>
+
+    <div class="text-center mt-3">
+        <a href="/movimientos" class="btn btn-secondary">Volver al listado</a>
+    </div>
+
+</div>
+
+<!-- JS ligero: obtiene los atributos data- del option seleccionado -->
+<script>
+    (function () {
+        const select = document.getElementById('productoSelect');
+        const tallaInput = document.getElementById('tallaInput');
+        const colorInput = document.getElementById('colorInput');
+
+        function actualizarDatos() {
+            const opt = select.options[select.selectedIndex];
+            // si value vacío -> limpiar
+            if (!opt || !opt.value) {
+                tallaInput.value = '';
+                colorInput.value = '';
+                return;
+            }
+            // usar dataset (talla y color provienen de th:attr en el option)
+            tallaInput.value = opt.dataset.talla || '';
+            colorInput.value = opt.dataset.color || '';
+        }
+
+        // actualizar al cambiar y también al cargar (si el controlador devuelve un movimiento con producto ya seleccionado)
+        select.addEventListener('change', actualizarDatos);
+        document.addEventListener('DOMContentLoaded', actualizarDatos);
+    })();
+</script>
+
+</body>
+</html>

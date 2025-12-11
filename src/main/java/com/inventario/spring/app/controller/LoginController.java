@@ -57,9 +57,9 @@ public class LoginController {
                 case "Administrador":
                     return "redirect:/usuarios"; // muestra listado de usuarios
                 case "Encargado de almacén":
-                    return "menu_almacen";
+                    return "redirect:/productos";
                 case "Gerente":
-                    return "menu_gerente";
+                    return "redirect:/reporte/graficos";
             }
         } else {
             model.addAttribute("error", "Usuario o contraseña incorrectos");
