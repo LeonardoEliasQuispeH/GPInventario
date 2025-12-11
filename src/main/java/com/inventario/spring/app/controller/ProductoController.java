@@ -133,7 +133,33 @@ public class ProductoController {
         return "productos/editar_producto";
     }
 
-    
+    // 🔍 Mostrar detalles del producto
+    @GetMapping("/productos/detalles/{id}")
+    public String mostrarDetallesProducto(@PathVariable Long id, HttpSession session, Model model, RedirectAttributes redirectAttrs) {
+        Usuario usuario = (Usuario) session.getAttribute("usuarioLogueado");
+        if (usuario == null || !usuario.getRol().equalsIgnoreCase("Encargado de almacén")) {
+            return "redirect:/login";
+        }
+        
+        try {
+            Producto producto = productoService.buscarPorId(id)
+                    .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+            model.addAttribute("producto", producto);
+
+            // ------------------------------------
+            // 2️⃣ Obtener historial de movimientos
+            // ------------------------------------
+            List<MovimientoProducto> historial = 
+                    movimientoProductoService.obtenerHistorialPorProducto(id);
+
+            model.addAttribute("historialMovimientos", historial);
+
+            return "productos/detalles_producto";
+        } catch (RuntimeException e) {
+            redirectAttrs.addFlashAttribute("mensaje", "Producto no encontrado.");
+            return "redirect:/productos";
+        }
+    }
 
     @GetMapping("/productos/exportar-excel")
     public void exportarExcel(HttpSession session, HttpServletResponse response) throws Exception {
