@@ -9,5 +9,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Ejemplo: buscar un usuario por su nombre de usuario
     Usuario findByUsuario(String usuario);
-   
+    Usuario findByCorreo(String correo);
+    Usuario findByCelular(String celular);
+    Usuario findByDni(String dni);
 }
