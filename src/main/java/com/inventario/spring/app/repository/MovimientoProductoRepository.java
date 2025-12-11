@@ -14,7 +14,10 @@ import com.inventario.spring.app.model.MovimientoProductoMesActual;
 @Repository
 public interface MovimientoProductoRepository extends JpaRepository<MovimientoProducto, Long> {
 
-  
+    List<MovimientoProducto> findByFechaMovimientoBetween(
+        LocalDateTime fechaInicio,
+        LocalDateTime fechaFin
+    );
 
     List<MovimientoProducto> findByTipoMovimiento(String tipoMovimiento);
 
