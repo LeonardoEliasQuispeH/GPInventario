@@ -25,11 +25,21 @@ public class UsuarioService {
     public Usuario verificarCredenciales(String usuario, String contrasena) {
         Usuario user = usuarioRepository.findByUsuario(usuario);
 
-        if (user != null && passwordEncoder.matches(contrasena, user.getClave())) {
-            return user; // Credenciales válidas
+        if (user == null) {
+            return null;
         }
 
-        return null; // Credenciales inválidas
+        // Verifica contraseña
+        if (!passwordEncoder.matches(contrasena, user.getClave())) {
+            return null;
+        }
+
+        // 🔒 Verifica estado
+        if (!"Activo".equalsIgnoreCase(user.getEstado())) {
+            throw new RuntimeException("USUARIO_DESACTIVADO");
+        }
+
+        return user;
     }
 
     /**
