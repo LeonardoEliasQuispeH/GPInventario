@@ -44,27 +44,31 @@ public class LoginController {
         }
 
         // Verificar credenciales
+        try {
         Usuario usuarioEncontrado = usuarioService.verificarCredenciales(usuario, clave);
 
         if (usuarioEncontrado != null) {
-            // Guardar usuario en sesión
             session.setAttribute("usuarioLogueado", usuarioEncontrado);
 
-            // Redirigir según rol (exactamente como en las HU)
-            String rol = usuarioEncontrado.getRol();
-
-            switch (rol) {
+            switch (usuarioEncontrado.getRol()) {
                 case "Administrador":
-                    return "redirect:/usuarios"; // muestra listado de usuarios
+                    return "redirect:/usuarios";
                 case "Encargado de almacén":
                     return "redirect:/productos";
                 case "Gerente":
                     return "redirect:/reporte/graficos";
             }
-        } else {
-            model.addAttribute("error", "Usuario o contraseña incorrectos");
         }
 
+        model.addAttribute("error", "Usuario o contraseña incorrectos");
+
+    } catch (RuntimeException e) {
+        if ("USUARIO_DESACTIVADO".equals(e.getMessage())) {
+            model.addAttribute("error", "El usuario se encuentra desactivado. Contacte al administrador.");
+        } else {
+            model.addAttribute("error", "Error al procesar el login.");
+        }
+    }
         return "login"; // si falla el login, vuelve al formulario
     }
 
