@@ -140,34 +140,7 @@ model.addAttribute("mesFin", mesActualStr);
         graf.put("values", values);
         model.addAttribute("datosJsonMonths", mapper.writeValueAsString(graf));
 
-        // ===== ENTRADAS (NUEVO) =====
-    List<MovimientoProductoMesActualDTO> tablaEntradas =
-            reporteService.obtenerEntradasPorRango(inicio, fin);
-
-    Map<String,Integer> totalesEntradas =
-            reporteService.calcularTotalesPorMes(tablaEntradas);
-
-    List<String> labelsEntradas = new ArrayList<>(totalesEntradas.keySet());
-    List<Integer> valuesEntradas = labelsEntradas.stream()
-            .map(totalesEntradas::get).toList();
-
-    List<String> labelsEntradasMesNombre = labelsEntradas.stream()
-            .map(l -> {
-                String[] p = l.split("-");
-                return monthName(Integer.parseInt(p[1])) + " " + p[0];
-            }).toList();
-
-    model.addAttribute("datosEntradas", tablaEntradas);
-
-    Map<String,Object> grafEntradas = new HashMap<>();
-    grafEntradas.put("labels", labelsEntradasMesNombre);
-    grafEntradas.put("values", valuesEntradas);
-
-    model.addAttribute(
-            "datosJsonMonthsEntradas",
-            mapper.writeValueAsString(grafEntradas)
-    );
-
+     
         
         // mantener valores del filtro en la vista
         model.addAttribute("mesInicio", mesInicio);
