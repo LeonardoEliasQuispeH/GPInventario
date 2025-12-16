@@ -7,6 +7,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Inventario</a>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 <div class="container mt-5">
 
     <!-- Título centrado -->
@@ -51,15 +63,20 @@
                     <td class="text-center" th:text="${usuario.dni}"></td>
                     <td class="text-center" th:text="${usuario.celular}"></td>
 
-                    <!-- Columna Estado: toggle switch centrado -->
+                   <!-- Columna Estado: toggle switch centrado -->
                     <td class="text-center">
                         <div class="form-check form-switch d-flex justify-content-center align-items-center m-0">
-                            <input class="form-check-input" type="checkbox"
-                                   th:checked="${usuario.estado == 'Activo'}"
-                                   th:id="'switch-' + ${usuario.id}"
-                                   th:data-id="${usuario.id}">
-                            <label class="form-check-label ms-2 mb-0" th:for="'switch-' + ${usuario.id}"
-                                   th:text="${usuario.estado}"></label>
+                            <input class="form-check-input"
+                            type="checkbox"
+                            th:checked="${usuario.estado == 'Activo'}"
+                            th:id="'switch-' + ${usuario.id}"
+                            th:data-id="${usuario.id}"
+                            th:data-label-id="'label-' + ${usuario.id}">
+                            <label class="form-check-label ms-2 mb-0"
+                                th:id="'label-' + ${usuario.id}"
+                                th:for="'switch-' + ${usuario.id}"
+                                th:text="${usuario.estado}">
+                            </label>
                         </div>
                     </td>
 
@@ -70,10 +87,10 @@
                             <i class="bi bi-pencil-fill"></i>
                         </a>
 
-                        <!-- Reestablecer contraseña -->
+                        <!-- Reestablecer contraseña 
                         <a th:href="@{'/usuarios/reestablecer/' + ${usuario.id}}" class="text-warning me-2" title="Reestablecer contraseña">
                             <i class="bi bi-key-fill"></i>
-                        </a>
+                        </a>-->
                     </td>
                 </tr>
             </tbody>
@@ -85,18 +102,37 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 document.querySelectorAll('.form-check-input').forEach(switchEl => {
-    switchEl.addEventListener('change', function() {
-        const id = this.getAttribute('data-id');
+    switchEl.addEventListener('change', function () {
+        const id = this.dataset.id;
         const activo = this.checked;
 
         fetch(`/usuarios/cambiar-estado/${id}?activo=${activo}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            const mensajeDiv = document.getElementById('mensaje');
+            const label = document.getElementById(`label-${id}`);
+
+            if (data.status === 'ok') {
+                label.textContent = activo ? 'Activo' : 'Desactivado';
+
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ${data.mensaje}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>`;
+            } else {
+                this.checked = !activo; // revertir
+                label.textContent = !activo ? 'Activo' : 'Desactivado';
+
+                mensajeDiv.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        ${data.mensaje}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>`;
             }
         })
-        .then(() => location.reload()) // recarga la página para actualizar mensajes
-        .catch(() => alert("Error al actualizar el estado del usuario."));
     });
 });
 </script>
