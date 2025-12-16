@@ -72,5 +72,38 @@ public class ReporteService {
             });
         return map;
     }
+
+    //
+    public List<MovimientoProductoMesActualDTO> obtenerEntradasMesActual() {
+    return repo.obtenerEntradasMesActual().stream()
+            .map(r -> new MovimientoProductoMesActualDTO(
+                    r.getIdProducto(),
+                    r.getNombreProducto(),
+                    r.getCantidadTotal(),
+                    r.getMes(),
+                    r.getAnio(),
+                    nombreMes(r.getMes())
+            ))
+            .toList();
+    }
+
+    public List<MovimientoProductoMesActualDTO> obtenerEntradasPorRango(
+        LocalDate inicioDate, LocalDate finDate) {
+
+    LocalDateTime inicio = inicioDate.atStartOfDay();
+    LocalDateTime fin = finDate.atTime(23,59,59);
+
+    return repo.obtenerEntradasPorRango(inicio, fin)
+            .stream()
+            .map(r -> new MovimientoProductoMesActualDTO(
+                    r.getIdProducto(),
+                    r.getNombreProducto(),
+                    r.getCantidadTotal(),
+                    r.getMes(),
+                    r.getAnio(),
+                    nombreMes(r.getMes())
+            ))
+            .toList();
+}
 }
 
