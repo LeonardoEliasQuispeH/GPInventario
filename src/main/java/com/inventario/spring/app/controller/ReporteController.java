@@ -59,9 +59,41 @@ public class ReporteController {
         graf.put("values", values);
         model.addAttribute("datosJsonMonths", mapper.writeValueAsString(graf));
 
-        // mantener valores del filtro vacío
-        model.addAttribute("mesInicio", "");
-        model.addAttribute("mesFin", "");
+        /* =======================
+       ENTRADAS (NUEVO)
+       ======================= */
+    List<MovimientoProductoMesActualDTO> entradasTabla =
+            reporteService.obtenerEntradasMesActual();
+
+    Map<String, Integer> entradasTotales =
+            reporteService.calcularTotalesPorMes(entradasTabla);
+
+    List<String> entradasLabels = new ArrayList<>(entradasTotales.keySet());
+    List<Integer> entradasValues = entradasLabels.stream()
+            .map(entradasTotales::get)
+            .toList();
+
+    List<String> entradasLabelsNombre = entradasLabels.stream()
+            .map(l -> {
+                String[] p = l.split("-");
+                return monthName(Integer.parseInt(p[1])) + " " + p[0];
+            }).toList();
+
+    model.addAttribute("datosEntradas", entradasTabla);
+
+    Map<String, Object> grafEntradas = new HashMap<>();
+    grafEntradas.put("labels", entradasLabelsNombre);
+    grafEntradas.put("values", entradasValues);
+    model.addAttribute("datosJsonMonthsEntradas",
+            mapper.writeValueAsString(grafEntradas));
+
+
+        // mostrar mes actual en el filtro al cargar
+YearMonth mesActual = YearMonth.now();
+String mesActualStr = mesActual.toString();
+
+model.addAttribute("mesInicio", mesActualStr);
+model.addAttribute("mesFin", mesActualStr);
 
         return "reportes/graficos";
     }
